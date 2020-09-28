@@ -7,66 +7,65 @@ using Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Services
 {
     public class TodoItemService : ITodoItemService
     {
-        private IMapper _mapper;
-        private readonly IRepository<TodoItem> _repository;
+        private readonly IMapper _mapper;
+        private readonly ITodoItemRepository _repository;
 
-        public TodoItemService(IMapper mapper, IRepository<TodoItem> repository)
+        public TodoItemService(IMapper mapper, ITodoItemRepository repository)
         {
             _mapper = mapper;
             _repository = repository;
         }
 
-        public TodoItemGetViewModel Create(TodoItem obj)
+        public TodoItemGetViewModel Create(TodoItemCreateViewModel value)
         {
-            var item = _repository.Create(obj);
+            TodoItem item = new TodoItem
+            {
+                Content = value.Content,
+                CreatedAt = DateTime.Now
+            };
+            var model = _repository.Create(item);
+            var viewmodel = _mapper.Map<TodoItemGetViewModel>(model);
+            return viewmodel;
+        }
+
+        public async Task<TodoItemGetViewModel> CreateAsync(TodoItemCreateViewModel value)
+        {
+            TodoItem item = new TodoItem
+            {
+                Content = value.Content,
+                CreatedAt = DateTime.Now
+            };
+            var model = await _repository.CreateAsync(item);
+            var viewmodel = _mapper.Map<TodoItemGetViewModel>(model);
+            return viewmodel;
+        }
+
+        public void Delete(int id)
+        {
+            _repository.Delete(x => x.Id.Equals(id));
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            await _repository.DeleteAsync(x => x.Id.Equals(id));
+        }
+
+        public TodoItemGetViewModel Get(int id)
+        {
+            var item = _repository.Get(x => x.Id.Equals(id));
             var viewmodel = _mapper.Map<TodoItemGetViewModel>(item);
             return viewmodel;
         }
 
-        public async Task<TodoItemGetViewModel> CreateAsync(TodoItem obj)
+        public async Task<TodoItemGetViewModel> GetAsync(int id)
         {
-            var item = await _repository.CreateAsync(obj);
-            var viewmodel = _mapper.Map<TodoItemGetViewModel>(item);
-            return viewmodel;
-        }
-
-        public void Delete(TodoItem obj)
-        {
-            _repository.Delete(obj);
-        }
-
-        public void Delete(Expression<Func<TodoItem, bool>> predicate)
-        {
-            _repository.Delete(predicate);
-        }
-
-        public async Task DeleteAsync(Expression<Func<TodoItem, bool>> predicate)
-        {
-            await _repository.DeleteAsync(predicate);
-        }
-
-        public async Task DeleteAsync(TodoItem obj)
-        {
-            await _repository.DeleteAsync(obj);
-        }
-
-        public TodoItemGetViewModel Get(Expression<Func<TodoItem, bool>> Get)
-        {
-            var item = _repository.Get(Get);
-            var viewmodel = _mapper.Map<TodoItemGetViewModel>(item);
-            return viewmodel;
-        }
-
-        public async Task<TodoItemGetViewModel> GetAsync(Expression<Func<TodoItem, bool>> predicate)
-        {
-            var item = await _repository.GetAsync(predicate);
+            var item = await _repository.GetAsync(x => x.Id.Equals(id));
             var viewmodel = _mapper.Map<TodoItemGetViewModel>(item);
             return viewmodel;
         }
@@ -93,16 +92,34 @@ namespace Services
             return viewmodel;
         }
 
-        public TodoItemGetViewModel Update(TodoItem obj)
+        public TodoItemGetViewModel Update(int id, TodoItemUpdateViewModel value)
         {
-            var item = _repository.Update(obj);
+            var model = _repository.Get(x => x.Id.Equals(id));
+            if (value.Content != null)
+            {
+                model.Content = value.Content;
+            }
+            if (value.IsCompleted != null)
+            {
+                model.IsCompleted = value.IsCompleted.Value;
+            }
+            var item = _repository.Update(model);
             var viewmodel = _mapper.Map<TodoItemGetViewModel>(item);
             return viewmodel;
         }
 
-        public async Task<TodoItemGetViewModel> UpdateAsync(TodoItem obj)
+        public async Task<TodoItemGetViewModel> UpdateAsync(int id, TodoItemUpdateViewModel value)
         {
-            var item = await _repository.UpdateAsync(obj);
+            var model = await _repository.GetAsync(x => x.Id.Equals(id));
+            if (value.Content != null)
+            {
+                model.Content = value.Content;
+            }
+            if (value.IsCompleted != null)
+            {
+                model.IsCompleted = value.IsCompleted.Value;
+            }
+            var item = _repository.UpdateAsync(model);
             var viewmodel = _mapper.Map<TodoItemGetViewModel>(item);
             return viewmodel;
         }

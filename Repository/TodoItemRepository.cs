@@ -1,4 +1,5 @@
 ﻿using AspNetCore.IQueryable.Extensions;
+using Database.Context;
 using Entities;
 using Microsoft.EntityFrameworkCore;
 using Repository.CustomSearch.Interfaces;
@@ -11,17 +12,16 @@ using System.Threading.Tasks;
 
 namespace Repository
 {
-    public class Repository<TKey, TObj> : IRepository<TObj>
-        where TObj : BaseEntity<TKey>, new()
+    public class TodoItemRepository : ITodoItemRepository
     {
-        protected readonly DbContext _context;
+        protected readonly WebDemoDbContext _context;
 
-        public Repository(DbContext context)
+        public TodoItemRepository(WebDemoDbContext context)
         {
             _context = context;
         }
 
-        public TObj Create(TObj obj)
+        public TodoItem Create(TodoItem obj)
         {
             if (obj == null)
             {
@@ -29,13 +29,13 @@ namespace Repository
             }
             else
             {
-                _context.Set<TObj>().Add(obj);
+                _context.Set<TodoItem>().Add(obj);
                 _context.SaveChanges();
                 return obj;
             }
         }
 
-        public async Task<TObj> CreateAsync(TObj obj)
+        public async Task<TodoItem> CreateAsync(TodoItem obj)
         {
             if (obj == null)
             {
@@ -43,13 +43,13 @@ namespace Repository
             }
             else
             {
-                _context.Set<TObj>().Add(obj);
+                _context.Set<TodoItem>().Add(obj);
                 await _context.SaveChangesAsync();
                 return obj;
             }
         }
 
-        public void Delete(TObj obj)
+        public void Delete(TodoItem obj)
         {
             if (obj != null)
             {
@@ -58,19 +58,19 @@ namespace Repository
             }
         }
 
-        public void Delete(Expression<Func<TObj, bool>> predicate)
+        public void Delete(Expression<Func<TodoItem, bool>> predicate)
         {
             var obj = Get(predicate);
             Delete(obj);
         }
 
-        public async Task DeleteAsync(Expression<Func<TObj, bool>> predicate)
+        public async Task DeleteAsync(Expression<Func<TodoItem, bool>> predicate)
         {
             var obj = await GetAsync(predicate);
             await DeleteAsync(obj);
         }
 
-        public async Task DeleteAsync(TObj obj)
+        public async Task DeleteAsync(TodoItem obj)
         {
             if (obj != null)
             {
@@ -95,33 +95,33 @@ namespace Repository
             }
         }
 
-        public TObj Get(Expression<Func<TObj, bool>> predicate)
+        public TodoItem Get(Expression<Func<TodoItem, bool>> predicate)
         {
-            return _context.Set<TObj>().FirstOrDefault(predicate);
+            return _context.Set<TodoItem>().FirstOrDefault(predicate);
         }
 
-        public async Task<TObj> GetAsync(Expression<Func<TObj, bool>> predicate)
+        public async Task<TodoItem> GetAsync(Expression<Func<TodoItem, bool>> predicate)
         {
-            return await _context.Set<TObj>().FirstOrDefaultAsync(predicate);
+            return await _context.Set<TodoItem>().FirstOrDefaultAsync(predicate);
         }
 
-        public IEnumerable<TObj> List(IBaseCustomSearch search)
+        public IEnumerable<TodoItem> List(IBaseCustomSearch search)
         {
-            return _context.Set<TObj>()
+            return _context.Set<TodoItem>()
                 .AsQueryable()
                 .Apply(search)
                 .ToList();
         }
 
-        public async Task<IEnumerable<TObj>> ListAsync(IBaseCustomSearch search)
+        public async Task<IEnumerable<TodoItem>> ListAsync(IBaseCustomSearch search)
         {
-            return await _context.Set<TObj>()
+            return await _context.Set<TodoItem>()
                                 .AsQueryable()
                                 .Apply(search)
                                 .ToListAsync();
         }
 
-        public TObj Update(TObj obj)
+        public TodoItem Update(TodoItem obj)
         {
             if (obj == null)
             {
@@ -135,7 +135,7 @@ namespace Repository
             }
         }
 
-        public async Task<TObj> UpdateAsync(TObj obj)
+        public async Task<TodoItem> UpdateAsync(TodoItem obj)
         {
             if (obj == null)
             {
